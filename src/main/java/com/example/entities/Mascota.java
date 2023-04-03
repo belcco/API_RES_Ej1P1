@@ -3,11 +3,12 @@ package com.example.entities;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+//import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -40,8 +41,11 @@ public class Mascota implements Serializable    {
     @Size(min = 2, max = 25, message = "El nombre tiene que estar entre 2 y 25 caracteres")
     private String nombre;
 
+    @NotEmpty(message = "La raza no puede estar vacía")
+    @Size(min = 4, max = 25, message = "La raza debe contener entre 4 y 25 caracteres")
     private String raza;
 
+    @Enumerated(EnumType.STRING)
     private Genero genero;
 
     public enum Genero {
@@ -50,7 +54,7 @@ public class Mascota implements Serializable    {
 
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JsonManagedReference
+    //@JsonManagedReference
     @JsonIgnore
     private Cliente cliente;
 

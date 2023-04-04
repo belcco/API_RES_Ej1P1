@@ -1,5 +1,10 @@
 package com.example.dao;
 
-public interface MascotaDao {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.example.entities.Mascota;
+
+public interface MascotaDao extends JpaRepository <Mascota, Long>   {
+
     
 }

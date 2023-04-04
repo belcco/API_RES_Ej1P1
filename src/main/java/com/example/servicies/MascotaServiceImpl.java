@@ -1,11 +1,10 @@
 package com.example.servicies;
 
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+
 import org.springframework.stereotype.Service;
 
 import com.example.dao.MascotaDao;
@@ -17,15 +16,6 @@ public class MascotaServiceImpl implements MascotaService   {
     @Autowired
     private MascotaDao mascotaDao;
 
-    @Override
-    public List<Mascota> findAll(Sort sort) {
-        return mascotaDao.findAll(sort);
-    }
-
-    @Override
-    public Page<Mascota> findAll(Pageable pageable) {
-        return mascotaDao.findAll(pageable);
-    }
 
     @Override
     public Mascota findById(long id) {
@@ -42,6 +32,12 @@ public class MascotaServiceImpl implements MascotaService   {
     public void delete(Mascota mascota) {
         mascotaDao.delete(mascota);
     
+    }
+
+
+    @Override
+    public List<Mascota> findAll() {
+        return mascotaDao.findAll();
     }
 
 }

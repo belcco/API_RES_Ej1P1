@@ -32,8 +32,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.entities.Cliente;
+import com.example.entities.Mascota;
 import com.example.model.FileUploadResponse;
 import com.example.servicies.ClienteService;
+import com.example.servicies.MascotaService;
 import com.example.utilities.FileDownloadUtil;
 import com.example.utilities.FileUploadUtil;
 
@@ -53,6 +55,9 @@ public class ClienteController {
 
     @Autowired
     private FileDownloadUtil fileDownloadUtil;
+
+    @Autowired
+    private MascotaService mascotaService;
 
     // GET - CLIENTE
 
@@ -182,26 +187,48 @@ public class ClienteController {
 
             if (clienteDB != null) {
 
+                List<Mascota> mascotas = clienteDB.getMascotas();
+
+                if (mascotas.size() != 0) {
+
+                    for (Mascota mascota : mascotas) {
+
+                        mascota.setCliente(clienteDB);
+                        mascotaService.save(mascota);
+
+                    }
+
+                }
+
+              clienteDB.setMascotas(mascotas);
+
+           
+        
+
                 String mensaje = "El cliente se añadido correctamente";
                 responseAsMap.put("mensaje", mensaje);
                 responseAsMap.put("cliente", clienteDB);
                 responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.CREATED);
 
-            } else {
+                
 
-                // ***
-                String errorMessage = "No se ha podido añadir el cliente";
-                responseAsMap.put("error", errorMessage);
-                responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.BAD_REQUEST);
-            }
+            }else{
 
-        } catch (DataAccessException e) {
+        // ***
+        String errorMessage = "No se ha podido añadir el cliente";
+        responseAsMap.put("error", errorMessage);
+        responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.BAD_REQUEST);
+    }
+
+    }catch(
+    DataAccessException e)
+    {
             String errorGrave = "Se ha producido un error grave y la causa puede ser " + e.getMostSpecificCause();
             responseAsMap.put("errorGrave", errorGrave);
             responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return responseEntity;
+    return responseEntity;
 
     }
 
@@ -315,6 +342,5 @@ public class ClienteController {
                 .body(resource);
 
     }
-
 
 }

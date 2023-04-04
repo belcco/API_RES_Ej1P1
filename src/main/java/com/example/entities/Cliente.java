@@ -51,6 +51,9 @@ public class Cliente implements Serializable    {
     @PastOrPresent
     private LocalDate fechaAlta;
 
+    //@NotNull
+    private String imagenCliente;
+
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "idHotel")

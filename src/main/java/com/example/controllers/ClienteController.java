@@ -7,12 +7,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -29,22 +32,27 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.entities.Cliente;
+import com.example.model.FileUploadResponse;
 import com.example.servicies.ClienteService;
+import com.example.utilities.FileDownloadUtil;
+import com.example.utilities.FileUploadUtil;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/clientes")
+
 public class ClienteController {
 
     @Autowired
     private ClienteService clienteService;
 
-    // @Autowired
-    // private FileUploadUtil fileUploadUtil;
+    @Autowired
+    private FileUploadUtil fileUploadUtil;
 
-    // private final FileDownloadUtil fileDownloadUtil;
+    @Autowired
+    private FileDownloadUtil fileDownloadUtil;
 
     // GET - CLIENTE
 
@@ -102,7 +110,6 @@ public class ClienteController {
                 String successMessage = "Se ha encontrado el cliente con id: " + id + " correctamente";
                 responseAsMap.put("mensaje", successMessage);
                 responseAsMap.put("cliente", cliente);
-                responseAsMap.put("mascotas", cliente.getMascotas());
                 responseEntity = new ResponseEntity<Map<String, Object>>(responseAsMap, HttpStatus.OK);
 
             } else {
@@ -152,22 +159,22 @@ public class ClienteController {
             return responseEntity;
         }
 
-        // if(!file.isEmpty()) {
-        // String fileCode = fileUploadUtil.saveFile(file.getOriginalFilename(), file);
-        // cliente.setImagenCliente(fileCode+"-"+file.getOriginalFilename());
+        if(!file.isEmpty()) {
+        String fileCode = fileUploadUtil.saveFile(file.getOriginalFilename(), file);
+        cliente.setImagenCliente(fileCode + "-" + file.getOriginalFilename());
 
-        // // Devolver informacion respecto al file recibido.
-        // FileUploadResponse fileUploadResponse = FileUploadResponse
-        // .builder()
-        // .fileName(fileCode + "-" + file.getOriginalFilename())
-        // .downloadURI("/clientes/downloadFile/" + fileCode + "-" +
-        // file.getOriginalFilename())
-        // .size(file.getSize())
-        // .build();
+        
+        FileUploadResponse fileUploadResponse = FileUploadResponse
+        .builder()
+        .fileName(fileCode + "-" + file.getOriginalFilename())
+        .downloadURI("/clientes/downloadFile/" + fileCode + "-" +
+        file.getOriginalFilename())
+        .size(file.getSize())
+        .build();
 
-        // responseAsMap.put("info de la imagen: ", fileUploadResponse);
+        responseAsMap.put("info de la imagen: ", fileUploadResponse);
 
-        // }
+        }
 
         Cliente clienteDB = clienteService.save(cliente);
 
@@ -282,34 +289,32 @@ public class ClienteController {
 
     }
 
-    /**
-     * Implementa filedownnload end point API
-     **/
+    // GET - FILE
 
-    // @GetMapping("/downloadFile/{fileCode}")
-    // public ResponseEntity<?> downloadFile(@PathVariable(name = "fileCode") String fileCode) {
+    @GetMapping("/downloadFile/{fileCode}")
+    public ResponseEntity<?> downloadFile(@PathVariable(name = "fileCode") String fileCode) {
 
-    //     Resource resource = null;
+        Resource resource = null;
 
-    //     try {
-    //         resource = fileDownloadUtil.getFileAsResource(fileCode);
-    //     } catch (IOException e) {
-    //         return ResponseEntity.internalServerError().build();
-    //     }
+        try {
+            resource = fileDownloadUtil.getFileAsResource(fileCode);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
 
-    //     if (resource == null) {
-    //         return new ResponseEntity<>("File not found ", HttpStatus.NOT_FOUND);
-    //     }
+        if (resource == null) {
+            return new ResponseEntity<>("File not found ", HttpStatus.NOT_FOUND);
+        }
 
-    //     String contentType = "application/octet-stream";
-    //     String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
+        String contentType = "application/octet-stream";
+        String headerValue = "attachment; filename=\"" + resource.getFilename() + "\"";
 
-    //     return ResponseEntity.ok()
-    //             .contentType(MediaType.parseMediaType(contentType))
-    //             .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
-    //             .body(resource);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, headerValue)
+                .body(resource);
 
-    // }
+    }
 
 
 }
